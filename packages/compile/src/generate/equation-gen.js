@@ -402,7 +402,7 @@ export default class EquationGen extends ModelReader {
       if (this.var.points.length < 1) {
         throw new Error(`ERROR: lookup size = ${this.var.points.length} in ${this.lhs}`)
       }
-      return [`  ${this.lhs} = __new_lookup(${this.var.points.length}, /*copy=*/false, ${dataName});`]
+      return [`  ${this.lhs} = __new_lookup(${this.lhs}, ${this.var.points.length}, /*copy=*/false, ${dataName});`]
     } else {
       return []
     }
@@ -488,7 +488,7 @@ export default class EquationGen extends ModelReader {
     if (lookupSize < 1) {
       throw new Error(`ERROR: lookup size = ${lookupSize} in ${this.lhs}`)
     }
-    return [`  ${this.lhs} = __new_lookup(${lookupSize}, /*copy=*/true, (double[]){ ${lookupData} });`]
+    return [`  ${this.lhs} = __new_lookup(${this.lhs}, ${lookupSize}, /*copy=*/true, (double[]){ ${lookupData} });`]
   }
   generateDirectConstInit() {
     // Map zero, one, or two subscripts on the LHS in model order to a table of numbers in a CSV file.
@@ -590,7 +590,7 @@ export default class EquationGen extends ModelReader {
         if (data.size < 1) {
           throw new Error(`ERROR: lookup size = ${data.size} in ${lhs}`)
         }
-        return `  ${lhs} = __new_lookup(${data.size}, /*copy=*/false, ${dataName});`
+        return `  ${lhs} = __new_lookup(${lhs}, ${data.size}, /*copy=*/false, ${dataName});`
       } else {
         return undefined
       }
@@ -673,7 +673,7 @@ export default class EquationGen extends ModelReader {
           throw new Error(`ERROR: lookup size = ${this.var.points.length} in ${this.var.refId}`)
         }
         let lookupData = R.reduce((a, p) => listConcat(a, `${cdbl(p[0])}, ${cdbl(p[1])}`, true), '', this.var.points)
-        this.emit(`__new_lookup(${this.var.points.length}, /*copy=*/true, (double[]){ ${lookupData} })`)
+        this.emit(`__new_lookup(${this.lhs}, ${this.var.points.length}, /*copy=*/true, (double[]){ ${lookupData} });`)
       }
     } else {
       super.visitEquation(ctx)

@@ -59,22 +59,24 @@ typedef struct {
   size_t n;
   double* inverted_data;
   bool data_is_owned;
+  bool is_changed;
   double last_input;
   size_t last_hit_index;
 } Lookup;
 
-Lookup* __new_lookup(size_t size, bool copy, double* data);
+Lookup* __new_lookup(Lookup* lookup, size_t size, bool copy, double* data);
+void __set_lookup(Lookup* lookup, bool copy, double* data);
 void __delete_lookup(Lookup* lookup);
 void __print_lookup(Lookup* lookup);
 
-double __lookup(Lookup *lookup, double input, bool use_inverted_data, LookupMode mode);
+double __lookup(Lookup* lookup, double input, bool use_inverted_data, LookupMode mode);
 #define _LOOKUP(lookup, x) __lookup(lookup, x, false, Interpolate)
 #define _LOOKUP_FORWARD(lookup, x) __lookup(lookup, x, false, Forward)
 #define _LOOKUP_BACKWARD(lookup, x) __lookup(lookup, x, false, Backward)
 #define _WITH_LOOKUP(x, lookup) __lookup(lookup, x, false, Interpolate)
 double _LOOKUP_INVERT(Lookup* lookup, double y);
 
-double __get_data_between_times(double *data, size_t n, double input, LookupMode mode);
+double __get_data_between_times(double* data, size_t n, double input, LookupMode mode);
 #define _GET_DATA_MODE_TO_LOOKUP_MODE(mode) ((mode) >= 1) ? Forward : (((mode) <= -1) ? Backward : Interpolate)
 #define _GET_DATA_BETWEEN_TIMES(lookup, x, mode) __get_data_between_times((lookup)->data, (lookup)->n, x, _GET_DATA_MODE_TO_LOOKUP_MODE(mode))
 

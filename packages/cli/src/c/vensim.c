@@ -53,23 +53,57 @@ double _ZIDZ(double a, double b) {
 //
 // Lookups
 //
-Lookup* __new_lookup(size_t size, bool copy, double* data) {
-  // Make a new Lookup with "size" number of pairs given in x, y order in a flattened list.
-  Lookup* lookup = malloc(sizeof(Lookup));
-  lookup->n = size;
-  lookup->inverted_data = NULL;
-  lookup->data_is_owned = copy;
+Lookup* __new_lookup(Lookup* lookup, size_t size, bool copy, double* data) {
+  // If an existing lookup's data was changed, restore it from the initialization data.
+  // This relies on static allocation of the lookup pointer, which SDEverywhere code gen does.
+  // The size of the lookup is assumed not to change between runs, so no reallocation is necessary.
+  size_t bufsize = size * 2 * sizeof(double);
+  if (lookup) {
+    if (lookup->is_changed) {
+      if (copy) {
+        // Copy the data into the already-allocated lookup data buffer.
+        memcpy(lookup->data, data, bufsize);
+      } else {
+        // Store a pointer to the lookup data (assumed to be static or owned elsewhere).
+        lookup->data = data;
+      }
+      // Clear inverted data that may have been allocated before in _LOOKUP_INVERT.
+      if (lookup->inverted_data) {
+        free(lookup->inverted_data);
+        lookup->inverted_data = NULL;
+      }
+      lookup->last_input = DBL_MAX;
+      lookup->last_hit_index = 0;
+    }
+  } else {
+    // Make a new Lookup with "size" number of pairs given in x, y order in a flattened list.
+    lookup = malloc(sizeof(Lookup));
+    lookup->n = size;
+    lookup->inverted_data = NULL;
+    lookup->data_is_owned = copy;
+    if (copy) {
+      // Copy the array into a new lookup data buffer.
+      lookup->data = malloc(bufsize);
+      memcpy(lookup->data, data, bufsize);
+    } else {
+      // Store a pointer to the lookup data (assumed to be static or owned elsewhere).
+      lookup->data = data;
+    }
+    lookup->last_input = DBL_MAX;
+    lookup->last_hit_index = 0;
+  }
+  lookup->is_changed = false;
+  return lookup;
+}
+void __set_lookup(Lookup* lookup, bool copy, double* data) {
   if (copy) {
-    // Copy array into the lookup data.
-    lookup->data = malloc(sizeof(double) * 2 * size);
-    memcpy(lookup->data, data, size * 2 * sizeof(double));
+    // Copy array into the already-allocated lookup data.
+    memcpy(lookup->data, data, lookup->n * 2 * sizeof(double));
   } else {
     // Store a pointer to the lookup data (assumed to be static or owned elsewhere).
     lookup->data = data;
   }
-  lookup->last_input = DBL_MAX;
-  lookup->last_hit_index = 0;
-  return lookup;
+  lookup->is_changed = true;
 }
 void __delete_lookup(Lookup* lookup) {
   if (lookup) {

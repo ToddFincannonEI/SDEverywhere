@@ -89,7 +89,6 @@ ${section(Model.dataVars())}
     mode = 'init-lookups'
     let code = `// Internal state
 bool lookups_initialized = false;
-bool data_initialized = false;
 `
     code += chunkedFunctions(
       'initLookups',
@@ -105,10 +104,8 @@ bool data_initialized = false;
       'initData',
       Model.dataVars(),
       `  // Initialize data.
-  if (!data_initialized) {
 `,
-      `      data_initialized = true;
-  }
+      `
 `
     )
     return code
