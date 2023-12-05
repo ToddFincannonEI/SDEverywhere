@@ -268,7 +268,8 @@ export default class EquationReader extends ModelReader {
         // that Vensim requires for ALLOCATE AVAILABLE. This is required to get correct dependencies.
         let ptypeRefId = this.expandedRefIds[0]
         let { subscripts } = Model.splitRefId(ptypeRefId)
-        let ptypeIndexName = subscripts[1]
+        // The priority subscript is the last one in the profile argument.
+        let ptypeIndexName = subscripts[subscripts.length - 1]
         let profileElementsDimName = sub(ptypeIndexName).family
         let profileElementsDim = sub(profileElementsDimName)
         let priorityRefId = ptypeRefId.replace(ptypeIndexName, profileElementsDim.value[1])
