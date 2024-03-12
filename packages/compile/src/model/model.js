@@ -414,7 +414,6 @@ function removeUnusedVariables(spec) {
           recordUsedVariable(refVar)
           pushRefs(refVar)
         } else {
-          throw new Error(`No var found for ${refId} when recording references for ${v.varName}`)
           console.error(v)
           process.exit(1)
         }
