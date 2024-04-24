@@ -429,9 +429,11 @@ double* _ALLOCATE_AVAILABLE(
         fabs(total_allocations - available_resource), total_allocations, available_resource);
 #endif
     if (++num_steps >= max_steps) {
+#ifdef PRINT_ALLOCATIONS_DEBUG_INFO
       fprintf(stderr,
           "_ALLOCATE_AVAILABLE failed to converge at time=%g with total_allocations=%18f, available_resource=%18f\n",
           _time, total_allocations, available_resource);
+#endif
       break;
     }
     // Set up the next x value by computing a new delta that is usually half the size of the
