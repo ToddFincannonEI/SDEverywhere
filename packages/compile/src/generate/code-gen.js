@@ -148,7 +148,7 @@ ${chunkedFunctions('evalLevels', Model.levelVars(), '  // Evaluate levels.')}
   // Input/output section
   //
   function emitIOCode() {
-    let headerVars = outputAllVars ? expandedVarNames(true) : spec.outputVars
+    let headerVars = outputAllVars ? expandedVarNames(true) : spec.outputVarNames
     let outputVars = outputAllVars ? expandedVarNames() : spec.outputVars
     mode = 'io'
     return `void setInputs(const char* inputData) {${inputsFromStringImpl()}}
@@ -156,7 +156,7 @@ ${chunkedFunctions('evalLevels', Model.levelVars(), '  // Evaluate levels.')}
 void setInputsFromBuffer(double* inputData) {${inputsFromBufferImpl()}}
 
 const char* getHeader() {
-  return "${R.map(varName => headerTitle(varName), headerVars).join('\\t')}";
+  return "${headerVars.join('\\t')}";
 }
 
 void storeOutputData() {
@@ -386,9 +386,6 @@ ${postStep}
       }
     }
     return inputVars
-  }
-  function headerTitle(varName) {
-    return Model.vensimName(varName).replace(/"/g, '\\"')
   }
 
   return {
