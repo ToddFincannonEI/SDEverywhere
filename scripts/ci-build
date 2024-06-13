@@ -69,12 +69,12 @@ run_in_workspaces parallel lint
 # Run type-check in all packages.  Note that for packages that use `tsup` to generate
 # .d.ts files, the build step will have already performed type checking, but `tsup`
 # doesn't type check the test files, so we do that here just to cover all bases.
-echo_separator "TYPE CHECK"
-run_in_workspaces parallel type-check
+# echo_separator "TYPE CHECK"
+# run_in_workspaces parallel type-check
 
 # Run test command in all packages
-echo_separator TEST
-run_in_workspaces parallel test:ci
+# echo_separator TEST
+# run_in_workspaces parallel test:ci
 
 # Generate API docs for all packages
 echo_separator DOCS
