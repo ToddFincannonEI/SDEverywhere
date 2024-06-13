@@ -16,14 +16,7 @@ let codeGenerator = (parseTree, opts) => {
   // Set to 'decl', 'init-lookups', 'eval', etc depending on the section being generated.
   let mode = ''
   // Set to true to output all variables when there is no model run spec.
-  let outputAllVars
-  if (spec.outputVars && spec.outputVars.length > 0) {
-    outputAllVars = false
-  } else if (spec.outputVarNames && spec.outputVarNames.length > 0) {
-    outputAllVars = false
-  } else {
-    outputAllVars = true
-  }
+  let outputAllVars = spec.outputVarNames === undefined || spec.outputVarNames.length === 0
   // Function to generate a section of the code
   let generateSection = R.map(v => new EquationGen(v, extData, directData, mode, modelDirname).generate())
   let section = R.pipe(generateSection, R.flatten, lines)
@@ -148,19 +141,19 @@ ${chunkedFunctions('evalLevels', Model.levelVars(), '  // Evaluate levels.')}
   // Input/output section
   //
   function emitIOCode() {
-    let headerVars = outputAllVars ? expandedVarNames(true) : spec.outputVarNames
-    let outputVars = outputAllVars ? expandedVarNames() : spec.outputVars
+    let headerVarNames = outputAllVars ? expandedVarNames(true) : spec.outputVarNames
+    let outputVarIds = outputAllVars ? expandedVarNames() : spec.outputVars
     mode = 'io'
     return `void setInputs(const char* inputData) {${inputsFromStringImpl()}}
 
 void setInputsFromBuffer(double* inputData) {${inputsFromBufferImpl()}}
 
 const char* getHeader() {
-  return "${R.map(varName => varName.replace(/"/g, '\\"'), headerVars).join('\\t')}";
+  return "${R.map(varName => varName.replace(/"/g, '\\"'), headerVarNames).join('\\t')}";
 }
 
 void storeOutputData() {
-${specOutputSection(outputVars)}
+${specOutputSection(outputVarIds)}
 }
 
 void storeOutput(size_t varIndex, size_t subIndex0, size_t subIndex1, size_t subIndex2) {
